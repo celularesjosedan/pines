@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIN TESTER PRO - Herramienta de PINes Comunes</title>
+    <title>PhoneLock Pro - Herramienta de PINes Comunes</title>
     <style>
         :root {
             --primary: #6366f1;
@@ -305,6 +305,26 @@
             transition: width 0.5s ease;
         }
 
+        .source-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .source-info h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .source-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -403,7 +423,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔓 PIN TESTER PRO</h1>
+            <h1>🔓 PhoneLock Pro</h1>
             <p>Herramienta profesional de PINes comunes para recuperación de acceso a dispositivos</p>
         </header>
 
@@ -474,6 +494,14 @@
         <section class="pins-section" id="untested">
             <div class="pins-grid" id="untestedGrid"></div>
         </section>
+
+        <div class="source-info">
+            <h3>📊 Información de la Fuente</h3>
+            <p><strong>Base de datos:</strong> Los PINes de 4 dígitos provienen del análisis de DataGenetics (Nick Berry) sobre 3.4 millones de PINes filtrados, uno de los estudios más citados mundialmente sobre patrones de PINes. Los PINes de 6 dígitos están basados en el estudio de la USENIX Security Symposium 2022 y publicaciones en ResearchGate sobre seguridad de PINes en smartphones.</p>
+            <p><strong>Estadísticas clave:</strong> El PIN "1234" representa aproximadamente el 10.7% de todos los PINes de 4 dígitos. Los 20 PINes más comunes representan cerca del 27% de todos los existentes. Para PINes de 6 dígitos, "123456" es el más usado con una frecuencia similar al 2.8%.</p>
+            <p><strong>Propósito:</strong> Herramienta para profesionales de recuperación de dispositivos que necesitan recuperar acceso de forma eficiente antes de proceder con métodos que impliquen reseteo completo y pérdida de datos.</p>
+            <p><strong>Nota:</strong> El progreso se guarda automáticamente en tu navegador mediante localStorage. También puedes exportarlo como JSON.</p>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -625,6 +653,7 @@
             navigator.clipboard.writeText(pin).then(() => {
                 showToast(`📋 PIN ${pin} copiado al portapapeles`);
             }).catch(() => {
+                // Fallback para navegadores sin clipboard API
                 const textarea = document.createElement('textarea');
                 textarea.value = pin;
                 document.body.appendChild(textarea);
@@ -697,15 +726,18 @@
             grid4.innerHTML = filtered4.length > 0 ? filtered4.map(p => renderPinCard(p)).join('') : renderEmptyState('No se encontraron PINes de 4 dígitos con estos filtros');
             grid6.innerHTML = filtered6.length > 0 ? filtered6.map(p => renderPinCard(p)).join('') : renderEmptyState('No se encontraron PINes de 6 dígitos con estos filtros');
 
+            // Tab "Probados"
             const allPins = [...pins4Digits, ...pins6Digits];
             const allTested = allPins.filter(p => testedPins[p.pin]);
             const testedGrid = document.getElementById('testedGrid');
             testedGrid.innerHTML = allTested.length > 0 ? allTested.map(p => renderPinCard(p)).join('') : renderEmptyState('Aún no has probado ningún PIN. ¡Comienza a probar!');
 
+            // Tab "Por Probar"
             const allUntested = allPins.filter(p => !testedPins[p.pin]);
             const untestedGrid = document.getElementById('untestedGrid');
             untestedGrid.innerHTML = allUntested.length > 0 ? allUntested.map(p => renderPinCard(p)).join('') : renderEmptyState('¡Felicidades! Ya probaste todos los PINes.');
 
+            // Actualizar contadores
             document.getElementById('count4').textContent = filtered4.length;
             document.getElementById('count6').textContent = filtered6.length;
         }
@@ -758,14 +790,16 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `pin_tester_progreso_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `phonelock_progreso_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
             showToast('📤 Progreso exportado como JSON');
         }
 
+        // Event listeners
         document.getElementById('searchInput').addEventListener('input', renderPins);
 
+        // Inicialización
         renderPins();
         updateStats();
     </script>
