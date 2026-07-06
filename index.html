@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pines Master - Herramienta de PINes Comunes</title>
+    <title>Pines Master v1 - Herramienta de PINes Comunes</title>
     <style>
         :root {
             --primary: #6366f1;
@@ -304,8 +304,7 @@
             border-radius: 10px;
             transition: width 0.5s ease;
         }
-
-        .toast {
+.toast {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -403,7 +402,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔓 PINES MASTER</h1>
+            <h1>🔓 Pines Master v1</h1>
             <p>Herramienta profesional de PINes comunes para recuperación de acceso a dispositivos</p>
         </header>
 
@@ -474,7 +473,7 @@
         <section class="pins-section" id="untested">
             <div class="pins-grid" id="untestedGrid"></div>
         </section>
-    </div>
+</div>
 
     <div class="toast" id="toast"></div>
 
@@ -625,6 +624,7 @@
             navigator.clipboard.writeText(pin).then(() => {
                 showToast(`📋 PIN ${pin} copiado al portapapeles`);
             }).catch(() => {
+                // Fallback para navegadores sin clipboard API
                 const textarea = document.createElement('textarea');
                 textarea.value = pin;
                 document.body.appendChild(textarea);
@@ -697,15 +697,18 @@
             grid4.innerHTML = filtered4.length > 0 ? filtered4.map(p => renderPinCard(p)).join('') : renderEmptyState('No se encontraron PINes de 4 dígitos con estos filtros');
             grid6.innerHTML = filtered6.length > 0 ? filtered6.map(p => renderPinCard(p)).join('') : renderEmptyState('No se encontraron PINes de 6 dígitos con estos filtros');
 
+            // Tab "Probados"
             const allPins = [...pins4Digits, ...pins6Digits];
             const allTested = allPins.filter(p => testedPins[p.pin]);
             const testedGrid = document.getElementById('testedGrid');
             testedGrid.innerHTML = allTested.length > 0 ? allTested.map(p => renderPinCard(p)).join('') : renderEmptyState('Aún no has probado ningún PIN. ¡Comienza a probar!');
 
+            // Tab "Por Probar"
             const allUntested = allPins.filter(p => !testedPins[p.pin]);
             const untestedGrid = document.getElementById('untestedGrid');
             untestedGrid.innerHTML = allUntested.length > 0 ? allUntested.map(p => renderPinCard(p)).join('') : renderEmptyState('¡Felicidades! Ya probaste todos los PINes.');
 
+            // Actualizar contadores
             document.getElementById('count4').textContent = filtered4.length;
             document.getElementById('count6').textContent = filtered6.length;
         }
@@ -758,14 +761,16 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `pines_master_progreso_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `phonelock_progreso_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
             showToast('📤 Progreso exportado como JSON');
         }
 
+        // Event listeners
         document.getElementById('searchInput').addEventListener('input', renderPins);
 
+        // Inicialización
         renderPins();
         updateStats();
     </script>
